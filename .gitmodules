@@ -13,3 +13,12 @@
 [submodule "pack/james/start/fugitive.vim"]
 	path = pack/james/start/fugitive.vim
 	url = https://github.com/tpope/vim-fugitive.git
+[submodule "pack/james/start/jshint.vim"]
+	path = pack/james/start/jshint.vim
+	url = https://github.com/wookiehangover/jshint.vim.git
+[submodule "pack/james/start/vim-ledger"]
+	path = pack/james/start/vim-ledger
+	url = https://github.com/ledger/vim-ledger.git
+[submodule "pack/james/start/vim-surround"]
+	path = pack/james/start/vim-surround
+	url = https://github.com/tpope/vim-surround.git
