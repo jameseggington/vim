@@ -1,6 +1,3 @@
-[submodule "pack/james/start/ctrlp.vim"]
-	path = pack/james/start/ctrlp.vim
-	url = https://github.com/kien/ctrlp.vim.git
 [submodule "pack/james/start/vim-blade"]
 	path = pack/james/start/vim-blade
 	url = https://github.com/jwalton512/vim-blade.git
@@ -10,9 +7,6 @@
 [submodule "pack/james/start/youcompleteme.vim"]
 	path = pack/james/start/youcompleteme.vim
 	url = https://github.com/Valloric/YouCompleteMe.git
-[submodule "pack/james/start/fugitive.vim"]
-	path = pack/james/start/fugitive.vim
-	url = https://github.com/tpope/vim-fugitive.git
 [submodule "pack/james/start/jshint.vim"]
 	path = pack/james/start/jshint.vim
 	url = https://github.com/wookiehangover/jshint.vim.git
@@ -22,3 +16,6 @@
 [submodule "pack/james/start/vim-surround"]
 	path = pack/james/start/vim-surround
 	url = https://github.com/tpope/vim-surround.git
+[submodule "pack/james/start/vimtex"]
+	path = pack/james/start/vimtex
+	url = https://github.com/lervag/vimtex.git
