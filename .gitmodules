@@ -19,3 +19,6 @@
 [submodule "pack/james/start/vimtex"]
 	path = pack/james/start/vimtex
 	url = https://github.com/lervag/vimtex.git
+[submodule "pack/james/start/vim-mustache-handlebars"]
+	path = pack/james/start/vim-mustache-handlebars
+	url = https://github.com/mustache/vim-mustache-handlebars.git
