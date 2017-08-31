@@ -22,3 +22,6 @@
 [submodule "pack/james/start/vim-mustache-handlebars"]
 	path = pack/james/start/vim-mustache-handlebars
 	url = https://github.com/mustache/vim-mustache-handlebars.git
+[submodule "pack/james/start/vim-go"]
+	path = pack/james/start/vim-go
+	url = https://github.com/fatih/vim-go.git
