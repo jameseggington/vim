@@ -1,3 +1,5 @@
+# Stop copy/paste inserting character codes at start and end of string
+
 # Display file name
 Ctrl-g
 
