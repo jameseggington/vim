@@ -7,12 +7,6 @@
 [submodule "pack/james/start/youcompleteme.vim"]
 	path = pack/james/start/youcompleteme.vim
 	url = https://github.com/Valloric/YouCompleteMe.git
-[submodule "pack/james/start/jshint.vim"]
-	path = pack/james/start/jshint.vim
-	url = https://github.com/wookiehangover/jshint.vim.git
-[submodule "pack/james/start/vim-ledger"]
-	path = pack/james/start/vim-ledger
-	url = https://github.com/ledger/vim-ledger.git
 [submodule "pack/james/start/vim-surround"]
 	path = pack/james/start/vim-surround
 	url = https://github.com/tpope/vim-surround.git
