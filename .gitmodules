@@ -1,12 +1,6 @@
 [submodule "pack/james/start/vim-blade"]
 	path = pack/james/start/vim-blade
 	url = https://github.com/jwalton512/vim-blade.git
-[submodule "pack/james/start/php.vim"]
-	path = pack/james/start/php.vim
-	url = https://github.com/StanAngeloff/php.vim.git
-[submodule "pack/james/start/youcompleteme.vim"]
-	path = pack/james/start/youcompleteme.vim
-	url = https://github.com/Valloric/YouCompleteMe.git
 [submodule "pack/james/start/vim-surround"]
 	path = pack/james/start/vim-surround
 	url = https://github.com/tpope/vim-surround.git
