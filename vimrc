@@ -16,6 +16,8 @@ set tabstop=2
 set laststatus=2
 set statusline=%<%f\ %y%{fugitive#statusline()}%q%=\ %10(%3l,%02c%)
 set noswapfile
+set sessionoptions="buffers,options,windows,localoptions,help"
+set splitright
 
 let g:netrw_banner=0
 let g:netrw_liststyle=3
@@ -60,26 +62,34 @@ nnoremap <leader>cn :cnext<cr>
 nnoremap <leader>cp :cprevious<cr>
 nnoremap <leader>cc :cclose<cr>
 
+nnoremap <leader>ds :!vagrant up<cr>
+nnoremap <leader>de :!vagrant halt<cr>
+
+"Window related commands
+nnoremap <leader>ws :split<cr>
+nnoremap <leader>wv :vsplit<cr>
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-H> <C-W><C-H>
+nnoremap <C-L> <C-W><C-L>
+
+"Write related commands
+cmap w!! w !sudo tee >/dev/null %
+
 "Autocommand to save session on exit and load it again on open
 function! MakeSession()
-  let b:sessiondir = $HOME . "/.vim/sessions" . getcwd()
-  if (filewritable(b:sessiondir) != 2)
-    exe 'silent !mkdir -p ' b:sessiondir
-    redraw!
-  endif
-  let b:filename = b:sessiondir . '/session.vim'
+  let b:filename = $HOME . "/session.vim"
   exe "mksession! " . b:filename
 endfunction
 
 function! LoadSession()
-  let b:sessiondir = $HOME . "/.vim/sessions" . getcwd()
-  let b:sessionfile = b:sessiondir . "/session.vim"
+  let b:sessionfile = $HOME . "/session.vim"
   if (filereadable(b:sessionfile))
     exe 'source ' b:sessionfile
+		exe "bfirst"
   else
     echo "No session loaded."
   endif
 endfunction
 au VimEnter * nested :call LoadSession()
 au VimLeave * :call MakeSession()
-

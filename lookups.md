@@ -1,3 +1,7 @@
+# Create an event that saves a session automatically on closing vim and reloads
+#it next time vim is opened. If vim is started with a file command argument,
+#that argument is the first buffer shown.
+
 # Stop copy/paste inserting character codes at start and end of string
 
 # Display file name
