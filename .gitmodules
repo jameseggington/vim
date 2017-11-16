@@ -22,3 +22,6 @@
 [submodule "pack/james/start/wmnusmv.vim"]
 	path = pack/james/start/wmnusmv.vim
 	url = https://github.com/wannesm/wmnusmv.vim.git
+[submodule "pack/james/start/vim-fubitive"]
+	path = pack/james/start/vim-fubitive
+	url = https://github.com/tommcdo/vim-fubitive.git
