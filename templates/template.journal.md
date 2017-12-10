@@ -1,7 +1,7 @@
-# Journal entry for <<strftime("%d %b %Y")>>
+# Journal entry for <<GetJournalDate("%d %b %Y")>>
 
-## Goals
+## What did I achieve?
 
-## Solutions
+## How did I achieve it?
 
-## Learning
+## How am I better off than yesterday?

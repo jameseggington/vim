@@ -102,8 +102,7 @@ function! OpenJournal()
 	if(!isdirectory(b:directory))
 		call mkdir(b:directory, 'p')
 	endif
-	edit b:directory . b:journalfile
-	file 'JOURNAL'
+	exe 'edit ' . b:directory . b:journalfile
 endfunction
 
 function! OpenJournalToday()
@@ -141,6 +140,8 @@ let s:tasks = []
 let s:taskId = ''
 let s:task = {}
 
+command! AOpen call RefreshAsanaWorkspaces()<cr> 
+
 function! RefreshAsanaWorkspaces()
 	let l:command = 'curl -s -H "Authorization: Bearer ' . s:personAccessToken . '" https://app.asana.com/api/1.0/workspaces'
 	let s:workspaces = ParseJSON(system(l:command))['data']
@@ -165,13 +166,12 @@ function! ShowAsanaWorkspaces()
 	endif
 	call cursor(l:workspaceLine, 1)
 	setlocal nomodifiable	
-	nnoremap <buffer> l :call GetAsanaWorkspaceFromLine()<cr>
-	nnoremap <buffer> r :call RefreshAsanaWorkSpaces()<cr>
+	nnoremap <buffer> <cr> :call GetAsanaWorkspaceFromLine()<cr>
+	nnoremap <buffer> R :call RefreshAsanaWorkSpaces()<cr>
 endfunction()
 
 function! GetAsanaWorkspaceFromLine()
-	let l:line = getline(".")
-	let s:workspaceId = matchstr(getline("."), "^[0-9]*")
+	let s:workspaceId = s:workspaces[line("*")]['id']
 	call RefreshAsanaWorkspaceTasks()
 endfunction
 
@@ -183,19 +183,31 @@ function! RefreshAsanaWorkspaceTasks()
 	call ShowAsanaWorkspaceTasks()
 endfunction
 
-function! ShowAsanaWorkspaceTasks()
+let s:filterIncomplete = 0
+function! ShowAsanaWorkspaceTasks(...)
+	let l:tasks = copy(s:tasks)
+	if s:filterIncomplete
+		let temp = []
+		for task in l:tasks
+			if !task['completed']
+				call add(temp, task)
+			endif
+		endfor
+		let l:tasks = temp
+	endif
 	silent! exe 'bw ' . 'ASANA_BUFFER'
 	call OpenAppBuffer('ASANA_BUFFER')
-	if len(s:tasks) < 1
+	if len(l:tasks) < 1
 		call append(0, 'No tasks found')
 	endif
-	for task in s:tasks
-		call append(0, printf("%-18s%-4s%-1s", task['id'], task['completed'] ? 'C' : 'U', task['name']))
+	for task in l:tasks
+		call append(0, printf("%-1s", task['name']))
 	endfor
 	setlocal nomodifiable	
-	nnoremap <buffer> h :call ShowAsanaWorkspaces()<cr>
-	nnoremap <buffer> l :call GetAsanaTaskFromLine()<cr>
-	nnoremap <buffer> r :call RefreshAsanaWorkspaceTasks()<cr>
+	nnoremap <buffer> q :call ShowAsanaWorkspaces()<cr>
+	nnoremap <buffer> <cr> :call OpenAsanaTask()<cr>
+	nnoremap <buffer> R :call RefreshAsanaWorkspaceTasks()<cr>
+	nnoremap <buffer> fi :call ToggleFilterAsanaTasksIncomplete()<cr>
 	let l:taskLine = 1
 	if exists("s:taskId")
 		let l:searchTaskLine = search(s:taskId)
@@ -206,10 +218,25 @@ function! ShowAsanaWorkspaceTasks()
 	call cursor(l:taskLine, 1)
 endfunction
 
-function! GetAsanaTaskFromLine()
-	let l:line = getline(".")
-	let s:taskId = matchstr(getline("."), "^[0-9]*")
+function! ToggleFilterAsanaTasksIncomplete()
+	let s:filterIncomplete = !s:filterIncomplete
+	call ShowAsanaWorkspaceTasks()
+endfunction
+
+function! OpenAsanaTask()
+	let s:taskId = s:tasks[line("*")]['id']
 	call RefreshAsanaTask()
+endfunction
+
+function! DeleteAsanaTask()
+	let l:taskId = s:tasks[line("*")]['id']
+	let l:choice = confirm("Really delete task " . l:taskId . "?")
+	if l:choice == 1
+		let l:command = 'curl -s -X DELETE -H "Authorization: Bearer ' . s:personAccessToken . '" https://app.asana.com/api/1.0/tasks/' . l:taskId
+		call system(l:command)
+		unlet s:tasks[l:taskId]
+		call ShowAsanaWorkspaceTasks()
+	endif
 endfunction
 
 function! RefreshAsanaTask()
@@ -223,13 +250,13 @@ function! ShowAsanaTask()
 	call OpenAppBuffer('ASANA_BUFFER')
 	setlocal wrap
 	setlocal textwidth=79
-	call append(0, s:task['notes'])
+	call append(0, iconv(s:task['notes'], "utf-16", &encoding))
 	call append(0, 'Description')
 	call append(0, s:task['completed'])
 	call append(0, s:task['id'] . ' ' . s:task['name'])
 	setlocal nomodifiable	
-	nnoremap <buffer> h :call ShowAsanaWorkspaceTasks()<cr>
-	nnoremap <buffer> r :call RefreshAsanaTask()<cr>
+	nnoremap <buffer> q :call ShowAsanaWorkspaceTasks()<cr>
+	nnoremap <buffer> R :call RefreshAsanaTask()<cr>
 endfunction
 
 " Custom autocommands
