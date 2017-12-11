@@ -7,6 +7,7 @@ set relativenumber
 set nowrap
 set path+=**
 set wildmenu
+set wildcharm=<Tab>
 set autoindent
 set smartindent
 set hidden " allows 'abandoning' a buffer without saving
@@ -21,7 +22,6 @@ set splitright
 
 let g:netrw_banner=0
 let g:netrw_liststyle=3
-
 
 let mapleader = ";"
 " Makes jk exit insert mode
@@ -38,9 +38,10 @@ nnoremap <leader>ew :w<cr>
 nnoremap <leader>es :source $MYVIMRC<cr>
 nnoremap <leader>el :e ~/.vim/lookups.md<cr>
 nnoremap <leader>en :e ~/Documents/notes.md<cr>
-nnoremap <leader>ev :e $MYVIMRC<cr>
+nnoremap <leader>ev :e ~/.vim/vimrc<cr>
 nnoremap <leader>eh :h 
-nnoremap <leader>ej :call OpenJournal()<cr> 
+nnoremap <leader>et :e /home/james/.vim/templates/template.
+nnoremap <leader>ef :e /home/james/.vim/filetypes/
 
 " File related commands
 nnoremap <leader>ff :fin 
@@ -64,9 +65,6 @@ nnoremap <leader>cn :cnext<cr>
 nnoremap <leader>cp :cprevious<cr>
 nnoremap <leader>cc :cclose<cr>
 
-nnoremap <leader>ds :!vagrant up<cr>
-nnoremap <leader>de :!vagrant halt<cr>
-
 " Window related commands
 nnoremap <leader>ws :split<cr>
 nnoremap <leader>wv :vsplit<cr>
@@ -76,9 +74,7 @@ nnoremap <C-H> <C-W><C-H>
 nnoremap <C-L> <C-W><C-L>
 
 " Journal commands
-command! Jtoday call OpenJournalToday()
-command! Jnext call OpenJournalTomorrow()
-command! Jprev call OpenJournalYesterday()
+nnoremap <leader>jj :call OpenJournalToday()<cr>
 
 " Write related commands
 cmap w!! w !sudo tee >/dev/null %
@@ -103,6 +99,8 @@ function! OpenJournal()
 		call mkdir(b:directory, 'p')
 	endif
 	exe 'edit ' . b:directory . b:journalfile
+	nnoremap <leader>jn :call OpenJournalTomorrow()<cr>
+	nnoremap <leader>jp :call OpenJournalYesterday()<cr>
 endfunction
 
 function! OpenJournalToday()
@@ -264,7 +262,7 @@ augroup vimrc
 	autocmd!
 
 	" Project specific config
-	" Projects are configured through vim scripts in the project's directory
+	" Projects are configured through vim scripts in the project's root
 	autocmd VimEnter * silent! exe 'source ' . getcwd() . '/project.vim'
 
 	" Templating
@@ -277,9 +275,9 @@ augroup vimrc
 	autocmd BufNewFile * %substitute:<<\(.\{-}\)>>:\=eval(submatch(1)):ge
 
 	" A replacement for the tempremental ftplugin system for loading filetype
-	" specific config. Different types of settings with a filetype can also be
-	" customised, for example .journal.md files load the config for .md then the
-	" config for .journal.md (so overrides the more general config)
+	" specific config. Subfiletypes can also be customised, for example
+	" .journal.md files load the config for .md then the config for .journal.md
+	" (so overrides the more general config)
 	autocmd BufNewFile,BufRead * silent! exe 'source ' $HOME . '/.vim/filetypes/' .  expand('<afile>:e') . '.vim'
 	autocmd BufNewFile,BufRead * silent! exe 'source ' $HOME . '/.vim/filetypes/' .  FullExtension(expand('<afile>:t')) . '.vim'
 augroup END
