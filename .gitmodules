@@ -25,6 +25,3 @@
 [submodule "pack/james/start/vim-fubitive"]
 	path = pack/james/start/vim-fubitive
 	url = https://github.com/tommcdo/vim-fubitive.git
-[submodule "pack/james/start/ParseJSON"]
-	path = pack/james/start/ParseJSON
-	url = https://github.com/vim-scripts/ParseJSON.git

@@ -142,7 +142,7 @@ command! AOpen call RefreshAsanaWorkspaces()<cr>
 
 function! RefreshAsanaWorkspaces()
 	let l:command = 'curl -s -H "Authorization: Bearer ' . s:personAccessToken . '" https://app.asana.com/api/1.0/workspaces'
-	let s:workspaces = ParseJSON(system(l:command))['data']
+	let s:workspaces = json_decode(system(l:command))['data']
 	call ShowAsanaWorkspaces()
 endfunction
 
@@ -176,7 +176,7 @@ endfunction
 function! RefreshAsanaWorkspaceTasks()
 	set maxfuncdepth=10000
 	let l:command = 'curl -s -H "Authorization: Bearer ' . s:personAccessToken . '" https://app.asana.com/api/1.0/tasks?\workspace=' . s:workspaceId . '\&assignee=me\&opt_fields=completed,name'
-	let s:tasks = ParseJSON(system(l:command))['data']
+	let s:tasks = json_decode(system(l:command))['data']
 	set maxfuncdepth=100
 	call ShowAsanaWorkspaceTasks()
 endfunction
@@ -239,7 +239,7 @@ endfunction
 
 function! RefreshAsanaTask()
 	let l:command = 'curl -s -H "Authorization: Bearer ' . s:personAccessToken . '" https://app.asana.com/api/1.0/tasks/' . s:taskId
-	let s:task = ParseJSON(system(l:command))['data']
+	let s:task = json_decode(system(l:command))['data']
 	call ShowAsanaTask()
 endfunction
 
@@ -280,4 +280,7 @@ augroup vimrc
 	" (so overrides the more general config)
 	autocmd BufNewFile,BufRead * silent! exe 'source ' $HOME . '/.vim/filetypes/' .  expand('<afile>:e') . '.vim'
 	autocmd BufNewFile,BufRead * silent! exe 'source ' $HOME . '/.vim/filetypes/' .  FullExtension(expand('<afile>:t')) . '.vim'
+
+	" Autosave buffers
+	autocmd TextChanged,TextChangedI * silent! write
 augroup END
