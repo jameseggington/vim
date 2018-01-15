@@ -1,7 +1,7 @@
 # Journal entry for <<GetJournalDate("%d %b %Y")>>
 
-## What did I achieve?
+## Tasks
 
-## How did I achieve it?
+## Finished
 
-## How am I better off than yesterday?
+## Review

@@ -1,7 +1,8 @@
 set nocompatible
 
-syntax on filetype plugin indent on
-colorscheme elflord
+syntax on
+filetype plugin indent on
+colorscheme monochrome
 set number
 set relativenumber
 set nowrap
@@ -15,10 +16,12 @@ set incsearch
 set tabstop=2
 set shiftwidth=2
 set laststatus=2
-set statusline=%<%f\ %y%{fugitive#statusline()}%q%=\ %10(%3l,%02c%)
+set statusline=%<%l/%L,%c\ in\ %f\ %=%{fugitive#statusline()}
 set noswapfile
-set sessionoptions=" options,windows,localoptions,help,buffers"
 set splitright
+set undofile
+set undodir=$HOME/.vim/undo
+set undolevels=1000
 
 let g:netrw_banner=0
 let g:netrw_liststyle=3
@@ -28,20 +31,24 @@ let mapleader = ";"
 inoremap jk <esc>l
 " Forces using jk to exit insert mode by removing mapping for <esc>
 inoremap <esc> <nop>
-
 " Maps t to toggle char case then move back to it
 nnoremap t ~h
+nnoremap H 0
+nnoremap L $
 
 " Editor commands
 nnoremap <leader>eq :qa!<cr>
 nnoremap <leader>ew :w<cr>
-nnoremap <leader>es :source $MYVIMRC<cr>
-nnoremap <leader>el :e ~/.vim/lookups.md<cr>
-nnoremap <leader>en :e ~/Documents/notes.md<cr>
-nnoremap <leader>ev :e ~/.vim/vimrc<cr>
-nnoremap <leader>eh :h 
-nnoremap <leader>et :e /home/james/.vim/templates/template.
-nnoremap <leader>ef :e /home/james/.vim/filetypes/
+nnoremap <leader>es :source %<cr>
+nnoremap <leader>en :e $HOME/Documents/notes.md<cr>
+nnoremap <leader>er :e $HOME/Documents/recipes/
+nnoremap <leader>el :e $HOME/.vim/lookups.md<cr>
+nnoremap <leader>ev :e $HOME/.vim/vimrc<cr>
+nnoremap <leader>et :e $HOME/.vim/templates/template.
+nnoremap <leader>ef :e $HOME/.vim/filetypes/
+nnoremap <leader>eb :e $HOME/.bashrc<cr>
+nnoremap <leader>em :e $HOME/.tmux.conf<cr>
+nnoremap <leader>ep :exe 'e ' . getcwd() . '/project.vim'<cr>
 
 " File related commands
 nnoremap <leader>ff :fin 
@@ -59,22 +66,28 @@ nnoremap <leader>br :2,bdelete<cr>
 
 " Make related commands
 nnoremap <leader>cm :silent make\|redraw!<cr>
-nnoremap <leader>cs :silent make\ start\|redraw!<cr>
 nnoremap <leader>co :copen<cr>
 nnoremap <leader>cn :cnext<cr>
 nnoremap <leader>cp :cprevious<cr>
 nnoremap <leader>cc :cclose<cr>
 
+" Fugitive commands
+nnoremap <leader>gs :Gstatus<cr>
+
 " Window related commands
-nnoremap <leader>ws :split<cr>
-nnoremap <leader>wv :vsplit<cr>
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-H> <C-W><C-H>
 nnoremap <C-L> <C-W><C-L>
 
+" Command bar remapping
+cnoremap <c-a> <home>
+cnoremap <c-e> <end>
+cnoremap <c-d> <del>
+
 " Journal commands
 nnoremap <leader>jj :call OpenJournalToday()<cr>
+nnoremap <leader>en :call OpenNote()<cr>
 
 " Write related commands
 cmap w!! w !sudo tee >/dev/null %
@@ -122,139 +135,14 @@ function! GetJournalDate(format)
 	return strftime(a:format, s:currentDate)
 endfunction
 
-" Opens a new buffer that has no filetype and closes without warning messages
-" Can specify the buffer name as first param and whether to clear when opening
-function! OpenAppBuffer(...)
-	let l:bufferName = a:1
-	exe 'silent! vsplit ' . l:bufferName
-	setlocal buftype=nofile
-	setlocal bufhidden=hide
-endfunction
-
-let s:personAccessToken = '0/cf732e275e31b7cb1138ae5246a0c7d5'
-let s:workspaces = []
-let s:workspaceId = ''
-let s:tasks = []
-let s:taskId = ''
-let s:task = {}
-
-command! AOpen call RefreshAsanaWorkspaces()<cr> 
-
-function! RefreshAsanaWorkspaces()
-	let l:command = 'curl -s -H "Authorization: Bearer ' . s:personAccessToken . '" https://app.asana.com/api/1.0/workspaces'
-	let s:workspaces = json_decode(system(l:command))['data']
-	call ShowAsanaWorkspaces()
-endfunction
-
-function! ShowAsanaWorkspaces()
-	silent! exe 'bw ' . 'ASANA_BUFFER'
-	call OpenAppBuffer('ASANA_BUFFER')
-	if len(s:workspaces) < 1
-		call append(0, 'No workspaces found')
+function! OpenNote()
+	let b:noteName = input("Enter a name: ")
+	let b:directory = $HOME . '/Documents/notes/'
+	let b:notePath = b:directory . b:noteName . '.note.md'
+	if(!isdirectory(b:directory))
+		call mkdir(b:directory, 'p')
 	endif
-	for workspace in s:workspaces
-		call append(0, printf("%-18s%-1s", workspace['id'], workspace['name']))
-	endfor
-	let l:workspaceLine = 1
-	if exists("s:workspaceId")
-		let l:searchWorkspaceLine = search(s:workspaceId)
-		if l:searchWorkspaceLine > 0
-			let l:workspaceLine = l:searchWorkspaceLine
-		endif
-	endif
-	call cursor(l:workspaceLine, 1)
-	setlocal nomodifiable	
-	nnoremap <buffer> <cr> :call GetAsanaWorkspaceFromLine()<cr>
-	nnoremap <buffer> R :call RefreshAsanaWorkSpaces()<cr>
-endfunction()
-
-function! GetAsanaWorkspaceFromLine()
-	let s:workspaceId = s:workspaces[line("*")]['id']
-	call RefreshAsanaWorkspaceTasks()
-endfunction
-
-function! RefreshAsanaWorkspaceTasks()
-	set maxfuncdepth=10000
-	let l:command = 'curl -s -H "Authorization: Bearer ' . s:personAccessToken . '" https://app.asana.com/api/1.0/tasks?\workspace=' . s:workspaceId . '\&assignee=me\&opt_fields=completed,name'
-	let s:tasks = json_decode(system(l:command))['data']
-	set maxfuncdepth=100
-	call ShowAsanaWorkspaceTasks()
-endfunction
-
-let s:filterIncomplete = 0
-function! ShowAsanaWorkspaceTasks(...)
-	let l:tasks = copy(s:tasks)
-	if s:filterIncomplete
-		let temp = []
-		for task in l:tasks
-			if !task['completed']
-				call add(temp, task)
-			endif
-		endfor
-		let l:tasks = temp
-	endif
-	silent! exe 'bw ' . 'ASANA_BUFFER'
-	call OpenAppBuffer('ASANA_BUFFER')
-	if len(l:tasks) < 1
-		call append(0, 'No tasks found')
-	endif
-	for task in l:tasks
-		call append(0, printf("%-1s", task['name']))
-	endfor
-	setlocal nomodifiable	
-	nnoremap <buffer> q :call ShowAsanaWorkspaces()<cr>
-	nnoremap <buffer> <cr> :call OpenAsanaTask()<cr>
-	nnoremap <buffer> R :call RefreshAsanaWorkspaceTasks()<cr>
-	nnoremap <buffer> fi :call ToggleFilterAsanaTasksIncomplete()<cr>
-	let l:taskLine = 1
-	if exists("s:taskId")
-		let l:searchTaskLine = search(s:taskId)
-		if l:searchTaskLine > 0
-			let l:taskLine = l:searchTaskLine
-		endif
-	endif
-	call cursor(l:taskLine, 1)
-endfunction
-
-function! ToggleFilterAsanaTasksIncomplete()
-	let s:filterIncomplete = !s:filterIncomplete
-	call ShowAsanaWorkspaceTasks()
-endfunction
-
-function! OpenAsanaTask()
-	let s:taskId = s:tasks[line("*")]['id']
-	call RefreshAsanaTask()
-endfunction
-
-function! DeleteAsanaTask()
-	let l:taskId = s:tasks[line("*")]['id']
-	let l:choice = confirm("Really delete task " . l:taskId . "?")
-	if l:choice == 1
-		let l:command = 'curl -s -X DELETE -H "Authorization: Bearer ' . s:personAccessToken . '" https://app.asana.com/api/1.0/tasks/' . l:taskId
-		call system(l:command)
-		unlet s:tasks[l:taskId]
-		call ShowAsanaWorkspaceTasks()
-	endif
-endfunction
-
-function! RefreshAsanaTask()
-	let l:command = 'curl -s -H "Authorization: Bearer ' . s:personAccessToken . '" https://app.asana.com/api/1.0/tasks/' . s:taskId
-	let s:task = json_decode(system(l:command))['data']
-	call ShowAsanaTask()
-endfunction
-
-function! ShowAsanaTask()
-	silent! exe 'bw ' . 'ASANA_BUFFER'
-	call OpenAppBuffer('ASANA_BUFFER')
-	setlocal wrap
-	setlocal textwidth=79
-	call append(0, iconv(s:task['notes'], "utf-16", &encoding))
-	call append(0, 'Description')
-	call append(0, s:task['completed'])
-	call append(0, s:task['id'] . ' ' . s:task['name'])
-	setlocal nomodifiable	
-	nnoremap <buffer> q :call ShowAsanaWorkspaceTasks()<cr>
-	nnoremap <buffer> R :call RefreshAsanaTask()<cr>
+	exe 'edit ' . b:notePath
 endfunction
 
 " Custom autocommands
